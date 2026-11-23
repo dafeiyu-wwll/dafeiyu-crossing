@@ -9,6 +9,8 @@ const TOPIC = 'dafeiyu-crossing-2264596933'
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const DATA_DIR = path.join(ROOT, 'data')
 const STORE = path.join(DATA_DIR, 'messages.jsonl')
+const IGNORE_FILE = path.join(DATA_DIR, 'ignore.txt')
+const IGNORED = new Set(fs.existsSync(IGNORE_FILE) ? fs.readFileSync(IGNORE_FILE, 'utf8').split('\n').map(x => x.trim()).filter(Boolean) : [])
 const OUT = path.join(ROOT, 'index.html')
 
 fs.mkdirSync(DATA_DIR, { recursive: true })
@@ -44,6 +46,7 @@ for (const since of ['12h', '11h']) {
 let added = 0
 const lines = []
 for (const m of got) {
+  if (IGNORED.has(m.id)) continue
   if (seen.has(m.id)) continue
   seen.set(m.id, m)
   lines.push(JSON.stringify({
